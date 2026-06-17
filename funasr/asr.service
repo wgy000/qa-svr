@@ -1,0 +1,17 @@
+[Unit]
+Description=FunASR ASR Service
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=/opt/funasr
+Environment="MEM_AVAIL_MIN_PERCENT=10"
+Environment="PHYS_CORES=6"
+Environment="MALLOC_ARENA_MAX=2"
+ExecStart=/usr/local/bin/uvicorn server:app --host 0.0.0.0 --port 50000 --workers 1
+Restart=always
+StandardOutput=append:/opt/funasr/logs/asr_service.log
+StandardError=append:/opt/funasr/logs/asr_service.log
+
+[Install]
+WantedBy=multi-user.target

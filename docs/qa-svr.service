@@ -1,0 +1,17 @@
+[Unit]
+Description=QA Service
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/qa-svr
+Environment="LANG=C.UTF-8"
+Environment="PYTHONIOENCODING=utf-8"
+
+ExecStart=/usr/local/bin/python3.10 main.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

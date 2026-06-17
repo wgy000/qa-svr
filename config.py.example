@@ -1,0 +1,93 @@
+# API认证配置
+API_KEY = "Your API KEY"
+
+# Ollama配置
+OLLAMA_BASE_URL = "ollama url:port"
+OLLAMA_MODEL = "ollama model name"
+
+# FunASR配置
+FUNASR_URL = "funasr url:port"
+# ASR并发数
+FUNASR_CONCURRENCY = 2
+
+# Ollama 并发数
+OLLAMA_CONCURRENCY = 5
+
+# 批量任务并发数（内部并行处理的最大任务数）
+BATCH_CONCURRENCY = 5
+
+# 服务器配置
+API_HOST = "0.0.0.0"
+API_PORT = 40000
+
+# 音频文件HTTP服务配置（对外访问地址）
+AUDIO_HTTP_HOST = ""
+AUDIO_HTTP_PORT = 40000
+
+# 音频URL签名密钥
+AUDIO_SIGN_KEY = "your-secret-key-change-it"
+
+# Nginx HTTP文件服务配置（支持多节点，按顺序并发探测）
+NGINX_SERVERS = [
+    {"host": "ip", "port": 8100, "desc": "主server"},
+    {"host": "ip", "port": 8100, "desc": "备server"}
+]
+
+# 日志配置
+LOG_LEVEL = "INFO"
+LOG_DIR = "/opt/qa-svr/log"
+WAV_FILE_DIR = "/opt/qa-svr/wavfile"
+
+# 音频转换工具路径
+AUDIO_CONVERT_BIN = "/opt/qa-svr/audioconvert"
+
+# ===================== PostgreSQL 持久化配置 =====================
+DB_ENABLED = True
+DB_HOST = "127.0.0.1"
+DB_PORT = 5432
+DB_NAME = "postgres"
+DB_USER = "postgres"
+DB_PASSWORD = "Your Password"
+DB_POOL_MIN = 1
+DB_POOL_MAX = 8
+DB_CONNECT_TIMEOUT = 10
+
+# 内存中已完成任务保留时长（秒），超时后从内存淘汰，读取自动回落数据库
+MEMORY_RETENTION_SECONDS = 1800
+# 内存快照写库的间隔（秒）
+FLUSH_INTERVAL_SECONDS = 3
+# 数据库中任务记录的保留天数，超期由定时清理删除
+JOB_RETENTION_DAYS = 30
+
+# ===================== Webhook 回调配置 =====================
+# 质检完成后主动把结果 POST 回调用方，取代调用方长时间轮询。
+# CALLBACK_SECRET 与 CALLBACK_ALLOWED_HOSTS 任一为空时，回调功能整体关闭。
+CALLBACK_SECRET = ""
+# 允许回调的主机白名单（只填主机名，不带协议和端口）。
+# 必填：qa-svr 与 Ollama/FunASR/Nginx 录音服务同处内网，放开任意回调地址等于开放内网 SSRF 跳板。
+CALLBACK_ALLOWED_HOSTS = [""]
+CALLBACK_TIMEOUT = 15
+CALLBACK_MAX_ATTEMPTS = 6
+CALLBACK_BACKOFF_BASE_SECONDS = 5
+CALLBACK_BACKOFF_MAX_SECONDS = 600
+CALLBACK_WORKER_INTERVAL = 2
+CALLBACK_BATCH_SIZE = 10
+
+# ===================== GlitchTip (Sentry 兼容) 配置 =====================
+# 留空字符串可关闭上报，便于本地开发
+import os as _os
+
+GLITCHTIP_DSN = _os.environ.get("GLITCHTIP_DSN", "")
+GLITCHTIP_ENVIRONMENT = _os.environ.get("GLITCHTIP_ENVIRONMENT", _os.environ.get("APP_ENV", "production"))
+GLITCHTIP_RELEASE = _os.environ.get("GLITCHTIP_RELEASE", "")
+GLITCHTIP_TRACES_SAMPLE_RATE = float(_os.environ.get("GLITCHTIP_TRACES_SAMPLE_RATE", "0.01"))
+# GlitchTip 6.2.2 不支持 session tracking，必须关闭
+GLITCHTIP_AUTO_SESSION_TRACKING = False
+# enable_logs: 把 INFO/WARNING/ERROR 等日志经 Sentry envelope 发到 GlitchTip 的 Logs 视图（注意：不是裸 OTLP）。
+# 服务端必须 GLITCHTIP_ENABLE_LOGS=true（6.1 起默认开）才会收；若为 false 则日志被静默丢弃、无任何报错。
+# Issues 视图只显示 event_level=ERROR 的"事件"；非 error 日志需开此开关才会在 Logs 页出现。
+# 注意：sentry-sdk 必须 >= 2.35.0 才支持 enable_logs 正式参数，否则会报错或被忽略。
+# 兼容多种真值写法：1/true/yes/on/y/t（环境变量多为字符串，避免只认 "1" 导致误判为关）
+_raw_logs = _os.environ.get("GLITCHTIP_ENABLE_LOGS", "1").strip().lower()
+GLITCHTIP_ENABLE_LOGS = _raw_logs in ("1", "true", "yes", "on", "t", "y")
+GLITCHTIP_SEND_DEFAULT_PII = False
